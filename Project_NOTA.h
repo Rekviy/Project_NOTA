@@ -4,24 +4,16 @@
 #include <cmath>
 #include <ctime>
 #include <string>
+#include <fstream>
+#include "classes/Note.h"
+#ifndef _UNICODE
+#define _UNICODE
+#endif
+#ifndef UNICODE
+#define UNICODE
+#endif
 
-class Note
-{
-private:
-	std::string name;
-	std::string description;
-	long num_Of_Chars = 0;
-	long num_Of_Words = 0;
-	std::string path;
-	std::string file_Name;
-public:
 
-};
-static class Settings
-{
-public:
-private:
-	std::string dir;
 
-};
-
+//will be replaced. Soon. Maybe.
+void TempGUI();

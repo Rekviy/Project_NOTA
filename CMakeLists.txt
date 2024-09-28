@@ -12,7 +12,7 @@ endif()
 project ("Project_NOTA")
 
 # Добавьте источник в исполняемый файл этого проекта.
-add_executable (Project_NOTA "Project_NOTA.cpp" "Project_NOTA.h")
+add_executable (Project_NOTA "Project_NOTA.cpp" "Project_NOTA.h"  "classes/Note.cpp"  "classes/Note.h")
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Project_NOTA PROPERTY CXX_STANDARD 20)
