@@ -8,12 +8,11 @@ wchar_t* Note::techFile = (wchar_t*)L"IMPORTANT.txt";
 
 void Note::saveTechInfo()
 {
-	std::wfstream* fs = openWFileStream(file_Name.c_str());
-	if (fs == nullptr)
-		return;
-	*fs << name + L" " + file_Name + L" " + std::to_wstring(num_Of_Chars) + L" " + std::to_wstring(num_Of_Words) + L" " +
+	std::wfstream fs;
+	openWFileStream(file_Name.c_str(),&fs);
+	fs << name + L" " + file_Name + L" " + std::to_wstring(num_Of_Chars) + L" " + std::to_wstring(num_Of_Words) + L" " +
 		std::to_wstring(num_Of_Strings) + L" " + std::to_wstring(cur_String);
-	(*fs).close();
+	fs.close();
 }
 
 void Note::ResizeNote()
@@ -79,18 +78,18 @@ void Note::saveToFile(std::wfstream* fs)
 }
 void Note::loadFile(const wchar_t* fileName)
 {
-	std::wfstream* fs = openWFileStream(fileName);
-	if (fs == nullptr)
-		return;
+	std::wfstream fs; 
+	openWFileStream(fileName,&fs);
+	
 
 	try
 	{
-		*fs >> name;
-		*fs >> file_Name;
-		*fs >> num_Of_Chars;
-		*fs >> num_Of_Words;
-		*fs >> num_Of_Strings;
-		*fs >> cur_String;
+		fs >> name;
+		fs >> file_Name;
+		fs >> num_Of_Chars;
+		fs >> num_Of_Words;
+		fs >> num_Of_Strings;
+		fs >> cur_String;
 	}
 	catch (const std::wfstream::failure& ex)
 	{
@@ -105,10 +104,12 @@ void Note::loadFile(const wchar_t* fileName)
 	}
 
 
-	(*fs).close();
+	fs.close();
 }
-int Note::writeNote(std::wfstream* fs)
+int Note::writeNote()
 {
+	std::wfstream fs;
+	openWFileStream(this->file_Name.c_str(),&fs);
 	std::wstring buff = L"";
 	std::cout << "(Q) to quit" << std::endl;
 	while (true)
@@ -118,12 +119,16 @@ int Note::writeNote(std::wfstream* fs)
 			break;
 		this->wstr_cpy(buff);
 	}
-	*fs << *this;
+	fs << *this;
+	fs.close();
 	return 0;
 }
-int Note::readNote(std::wfstream* fs)
+int Note::readNote()
 {
+	std::wfstream fs;
+	openWFileStream(this->file_Name.c_str(),&fs);
 	std::wcout << *this << std::endl;
+	fs.close();
 	return 0;
 }
 
@@ -138,22 +143,22 @@ wchar_t* Note::getDir()
 	return dir;
 }
 
-std::wfstream* Note::openWFileStream(const wchar_t* str)
+int Note::openWFileStream(const wchar_t* file_Name, std::wfstream* fs)
 {
-	wchar_t* tempstr = new wchar_t[std::wcslen(str) + std::wcslen(dir) + 1];
+	wchar_t* tempstr = new wchar_t[std::wcslen(file_Name) + std::wcslen(dir) + 1];
 
-	//std::wcscpy(tempstr, dir);
+	std::wcscpy(tempstr, dir);
 
-	wcscpy_s(tempstr, wcslen(dir), dir);
-
-	//std::wcscat(tempstr, str);
-	wcscat_s(tempstr, wcslen(str), str);
-	std::wfstream fs;
-	fs.exceptions(std::wfstream::badbit | std::wfstream::failbit);
+	//wcscpy_s(tempstr, wcslen(dir), dir);
+	//wcscat_s(tempstr, wcslen(str), str);
+	std::wcscat(tempstr, file_Name);
+	
+	
+	(*fs).exceptions(std::wfstream::badbit | std::wfstream::failbit);
 	try
 	{
 		std::cout << "Открытие файла..." << std::endl;
-		fs.open(tempstr, std::wfstream::app | std::wfstream::in | std::wfstream::out);
+		(*fs).open(tempstr, std::wfstream::app | std::wfstream::in | std::wfstream::out);
 		std::cout << "Файл успешно открыт!" << std::endl;
 	}
 	catch (const std::wfstream::failure& ex)
@@ -161,31 +166,30 @@ std::wfstream* Note::openWFileStream(const wchar_t* str)
 		std::cout << "ERROR" << ex.what() << std::endl;
 		std::cout << "CODE:" << ex.code() << std::endl;
 		delete[] tempstr;
-		return nullptr;
+		return -1;
 	}
 	catch (const std::exception& ex)
 	{
 		std::cout << "ERROR" << ex.what() << std::endl;
 		delete[] tempstr;
-		return nullptr;
+		return -1;
 	}
 	delete[] tempstr;
-	return &fs;
+	return 0;
 }
 void Note::loadFileNames()
 {
-	std::wfstream* fs = openWFileStream(techFile);
-	if (fs == nullptr)
-		return;
-
+	std::wfstream fs; 
+	openWFileStream(techFile,&fs);
+	
 	while (true)
 	{
-		if ((*fs).eof())
+		if (fs.eof())
 		{
 			break;
 		}
 
-		*fs >> File_Names[cur_File];
+		fs >> File_Names[cur_File];
 		cur_File++;
 
 		if (cur_File == end_File_Names)
@@ -194,18 +198,18 @@ void Note::loadFileNames()
 		}
 
 	}
-	(*fs).close();
+	fs.close();
 }
 void Note::saveFileNames(Note notes[], unsigned len)
 {
-	std::wfstream* fs = openWFileStream(techFile);
-	if (fs == nullptr)
-		return;
+	std::wfstream fs;
+	openWFileStream(techFile, &fs);
+
 	for (int i = 0; i < len; i++)
 	{
-		*fs << notes[i].getFileName() << L" ";
+		fs << notes[i].getFileName() << L" ";
 	}
-	(*fs).close();
+	fs.close();
 
 }
 void Note::ResizeFile_Names()
@@ -239,3 +243,5 @@ std::wistream& operator>>(std::wistream& is, Note& note)
 	}
 	return is;
 }
+
+

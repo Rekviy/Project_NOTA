@@ -41,15 +41,15 @@ public:
 	int wstr_cpy(std::wstring& str);
 	void saveToFile(std::wfstream* fs);
 	void loadFile(const wchar_t* fileName);
-	int writeNote(std::wfstream* fs);
-	int readNote(std::wfstream* fs);
+	int writeNote();
+	int readNote();
 
 
 	//former settings
 	static void setDir(wchar_t* dir);
 	static wchar_t* getDir();
 
-	static std::wfstream* openWFileStream(const wchar_t* str);
+	static int openWFileStream(const wchar_t* file_Name, std::wfstream* fs);
 	static void loadFileNames();
 	static void saveFileNames(Note notes[], unsigned len);
 };
