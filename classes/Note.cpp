@@ -1,68 +1,27 @@
+#include "Settings.h"
 #include "Note.h"
-//former settings
-int Note::cur_File = 0;
-int Note::end_File_Names = 4;
-std::wstring* Note::File_Names = new std::wstring[end_File_Names];
-wchar_t* Note::dir = (wchar_t*)L"C:\\Users\\Vital\\AppData\\Local\\NOTA\\";
-wchar_t* Note::techFile = (wchar_t*)L"IMPORTANT.txt";
-
-void Note::saveTechInfo()
-{
-	std::wfstream fs;
-	openWFileStream(file_Name.c_str(),&fs);
-	fs << name + L" " + file_Name + L" " + std::to_wstring(num_Of_Chars) + L" " + std::to_wstring(num_Of_Words) + L" " +
-		std::to_wstring(num_Of_Strings) + L" " + std::to_wstring(cur_String);
-	fs.close();
-}
-
-void Note::ResizeNote()
-{
-	num_Of_Strings += 8;
-	std::wstring* newNote = new std::wstring[num_Of_Strings];
-	for (int i = 0; i < cur_String; i++)
-	{
-		newNote[i] = note[i];
-	}
-
-	delete[] note;
-	note = newNote;
-}
-
-Note::Note(std::wstring fileName) : Note(L"Unknown", fileName) {}
-
-Note::Note(std::wstring name, std::wstring fileName)
-{
+Note::Note(std::wstring file, std::wstring dir, std::wstring name) {
+	this->file = file;
+	this->dir = dir;
 	this->name = name;
-	this->file_Name = fileName;
 	note = new std::wstring[num_Of_Strings];
+	fs = &FileStream((dir + file).c_str());
 }
 
-Note::~Note()
-{
+Note::~Note(){
 	delete[] note;
 }
 
-unsigned Note::getNumOfStrings()
-{
-	return num_Of_Strings;
-}
-unsigned Note::getCurrentString()
-{
-	return cur_String;
-}
-
-std::wstring Note::getFileName()
-{
-	return file_Name;
-}
-std::wstring Note::getName()
-{
-	return name;
-}
+unsigned Note::getNumOfStrings() {return num_Of_Strings;}
+unsigned Note::getCurrentString() {return cur_String;}
 
 
-int Note::wstr_cpy(std::wstring& str)
-{
+std::wstring Note::getDir() {return dir;}
+std::wstring Note::getFileName() {return file;}
+std::wstring Note::getName() {return name;}
+
+
+int Note::wstr_cpy(std::wstring& str){
 	note[cur_String] = str;
 	cur_String++;
 	if (cur_String == num_Of_Strings - 1)
@@ -71,45 +30,14 @@ int Note::wstr_cpy(std::wstring& str)
 	}
 	return 0;
 }
-void Note::saveToFile(std::wfstream* fs)
-{
-	*fs << this;
-	saveTechInfo();
+
+void Note::saveToFile(){
+	fs.getFout() << this;
+	Settings::saveTechInfo(*this);
 }
-void Note::loadFile(const wchar_t* fileName)
-{
-	std::wfstream fs; 
-	openWFileStream(fileName,&fs);
-	
 
-	try
-	{
-		fs >> name;
-		fs >> file_Name;
-		fs >> num_Of_Chars;
-		fs >> num_Of_Words;
-		fs >> num_Of_Strings;
-		fs >> cur_String;
-	}
-	catch (const std::wfstream::failure& ex)
-	{
-		std::cout << "ERROR" << ex.what() << std::endl;
-		std::cout << "CODE:" << ex.code() << std::endl;
-		return;
-	}
-	catch (const std::exception& ex)
-	{
-		std::cout << "ERROR" << ex.what() << std::endl;
-		return;
-	}
-
-
-	fs.close();
-}
 int Note::writeNote()
 {
-	std::wfstream fs;
-	openWFileStream(this->file_Name.c_str(),&fs);
 	std::wstring buff = L"";
 	std::cout << "(Q) to quit" << std::endl;
 	while (true)
@@ -119,111 +47,24 @@ int Note::writeNote()
 			break;
 		this->wstr_cpy(buff);
 	}
-	fs << *this;
-	fs.close();
+	fs.getFout() << *this;
 	return 0;
 }
 int Note::readNote()
 {
-	std::wfstream fs;
-	openWFileStream(this->file_Name.c_str(),&fs);
 	std::wcout << *this << std::endl;
-	fs.close();
 	return 0;
 }
 
+void Note::ResizeNote() {
+	num_Of_Strings *= 1.5;
+	std::wstring* newNote = new std::wstring[num_Of_Strings];
+	for (int i = 0; i < cur_String; i++)
+		newNote[i] = note[i];
 
-//former settings
-void Note::setDir(wchar_t* dir)
-{
-	Note::dir = dir;
+	delete[] note;
+	note = newNote;
 }
-wchar_t* Note::getDir()
-{
-	return dir;
-}
-
-int Note::openWFileStream(const wchar_t* file_Name, std::wfstream* fs)
-{
-	wchar_t* tempstr = new wchar_t[std::wcslen(file_Name) + std::wcslen(dir) + 1];
-
-	std::wcscpy(tempstr, dir);
-
-	//wcscpy_s(tempstr, wcslen(dir), dir);
-	//wcscat_s(tempstr, wcslen(str), str);
-	std::wcscat(tempstr, file_Name);
-	
-	
-	(*fs).exceptions(std::wfstream::badbit | std::wfstream::failbit);
-	try
-	{
-		std::cout << "Открытие файла..." << std::endl;
-		(*fs).open(tempstr, std::wfstream::app | std::wfstream::in | std::wfstream::out);
-		std::cout << "Файл успешно открыт!" << std::endl;
-	}
-	catch (const std::wfstream::failure& ex)
-	{
-		std::cout << "ERROR" << ex.what() << std::endl;
-		std::cout << "CODE:" << ex.code() << std::endl;
-		delete[] tempstr;
-		return -1;
-	}
-	catch (const std::exception& ex)
-	{
-		std::cout << "ERROR" << ex.what() << std::endl;
-		delete[] tempstr;
-		return -1;
-	}
-	delete[] tempstr;
-	return 0;
-}
-void Note::loadFileNames()
-{
-	std::wfstream fs; 
-	openWFileStream(techFile,&fs);
-	
-	while (true)
-	{
-		if (fs.eof())
-		{
-			break;
-		}
-
-		fs >> File_Names[cur_File];
-		cur_File++;
-
-		if (cur_File == end_File_Names)
-		{
-			ResizeFile_Names();
-		}
-
-	}
-	fs.close();
-}
-void Note::saveFileNames(Note notes[], unsigned len)
-{
-	std::wfstream fs;
-	openWFileStream(techFile, &fs);
-
-	for (int i = 0; i < len; i++)
-	{
-		fs << notes[i].getFileName() << L" ";
-	}
-	fs.close();
-
-}
-void Note::ResizeFile_Names()
-{
-	end_File_Names += 8;
-	std::wstring* newFile_Names = new std::wstring[end_File_Names];
-	for (int i = 0; i < cur_File; i++)
-	{
-		newFile_Names[i] = File_Names[i];
-	}
-	delete[] File_Names;
-	File_Names = newFile_Names;
-}
-
 
 std::wostream& operator<<(std::wostream& os, Note& note)
 {

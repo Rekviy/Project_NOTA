@@ -5,7 +5,6 @@ void testFile();
 int main(){
 	srand(time(NULL));
 	setlocale(LC_ALL, "ru");
-
 	//TempGUI();
 	testFile();
 	return 0;}
@@ -30,11 +29,13 @@ void testFile()
 			break;
 		case '2':
 			notation.readNote();
+			system("pause");
 			break;
 		default:
 			std::cout << "Выход из приложения..." << std::endl;
 			break;
 		}
+		
 		system("cls");
 	}
 		
