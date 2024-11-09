@@ -14,21 +14,18 @@ public:
 	FileStream& operator=(FileStream* other);
 	FileStream* operator&();
 	void closeStreams();
+	void closeFinStream();
+	void closeFoutStream();
+	void openStreams(const wchar_t* file);
+	void openFinStream(const wchar_t* file);
+	void openFoutStream(const wchar_t* file);
 	std::wifstream& getFin();
 	std::wofstream& getFout();
-	bool isFinOpened();
-	bool isFoutOpened();
+
 private:
 	std::wifstream* fin = nullptr;
 	std::wofstream* fout = nullptr;
-	bool finOpened = false;
-	bool foutOpened = false;
 	void openFin(const wchar_t* file);
 	void openFout(const wchar_t* file);
 };
-
-
-
-
-
 #endif

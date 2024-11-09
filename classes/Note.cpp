@@ -1,88 +1,86 @@
 #include "Settings.h"
 #include "Note.h"
-Note::Note(std::wstring file, std::wstring dir, std::wstring name) {
-	this->file = file;
-	this->dir = dir;
+Note::Note(std::wstring name, std::wstring dir) {
+	this->file = dir + name + L".txt";
 	this->name = name;
-	note = new std::wstring[num_Of_Strings];
-	fs = &FileStream((dir + file).c_str());
+	note = new std::wstring[capacity];
+	fs.openStreams((vault+file).c_str());
 }
 
 Note::~Note(){
 	delete[] note;
+	//todo delete file
+	fs.closeStreams();
 }
 
-unsigned Note::getNumOfStrings() {return num_Of_Strings;}
-unsigned Note::getCurrentString() {return cur_String;}
+unsigned Note::getCapacity() {return capacity;}
+unsigned Note::getSize() {return size;}
 
+const std::wstring& Note::getFile() {return file;}
+const std::wstring& Note::getName() {return name;}
+const std::string& Note::getHash() { return hash; }
+std::wstring Note::getVault() {return vault;}
+const std::wstring& Note::operator[](unsigned num){return note[num];}
 
-std::wstring Note::getDir() {return dir;}
-std::wstring Note::getFileName() {return file;}
-std::wstring Note::getName() {return name;}
+int Note::write(std::wstring& str){
 
+	note[size] = str + L"\n";
+	fs.getFout() << note[size];
+	size++;
 
-int Note::wstr_cpy(std::wstring& str){
-	note[cur_String] = str;
-	cur_String++;
-	if (cur_String == num_Of_Strings - 1)
-	{
-		ResizeNote();
-	}
+	if (size == capacity)
+		Resize(capacity * 2);
 	return 0;
 }
 
-void Note::saveToFile(){
-	fs.getFout() << this;
-	Settings::saveTechInfo(*this);
+void Note::saveNote() {Settings::saveFileInfo(*this);}
+
+void Note::load(){
+	Resize(capacity);
+	for (unsigned i = 0; i < fs.getFin().eof(); i++)
+		fs.getFin() >> *this;
 }
 
-int Note::writeNote()
-{
-	std::wstring buff = L"";
-	std::cout << "(Q) to quit" << std::endl;
-	while (true)
-	{
-		std::wcin >> buff;
-		if (buff == L"Q" || buff == L"q")
-			break;
-		this->wstr_cpy(buff);
-	}
+void Note::save(){
 	fs.getFout() << *this;
-	return 0;
-}
-int Note::readNote()
-{
-	std::wcout << *this << std::endl;
-	return 0;
 }
 
-void Note::ResizeNote() {
-	num_Of_Strings *= 1.5;
-	std::wstring* newNote = new std::wstring[num_Of_Strings];
-	for (int i = 0; i < cur_String; i++)
+void Note::reOpenFileStream(){
+	try
+	{
+		fs.closeStreams();
+		fs.openStreams((vault + file).c_str());
+	}
+	catch (const std::exception& ex)
+	{
+		std::cout << ex.what() << std::endl;
+	}
+}
+
+void Note::Resize(unsigned newSize) {
+	std::wstring* newNote = new std::wstring[newSize];
+	if (size > newSize)
+		size = newSize;
+
+	for (int i = 0; i < size; i++)
 		newNote[i] = note[i];
 
 	delete[] note;
 	note = newNote;
+	capacity = newSize;
 }
 
-std::wostream& operator<<(std::wostream& os, Note& note)
-{
-	for (int i = 0; i < note.cur_String; i++)
-	{
-		os << note.note[i] << L"\n";
-	}
+std::wostream& operator<<(std::wostream& os, Note& note){
+	for (unsigned i = 0; i < note.size; i++)
+		os << note.note[i];
 	return os;
 }
-std::wistream& operator>>(std::wistream& is, Note& note)
-{
-	std::getline(is, note.note[note.cur_String]);
-	note.cur_String++;
-	if (note.cur_String == note.num_Of_Strings)
-	{
-		note.ResizeNote();
-	}
+std::wistream& operator>>(std::wistream& is, Note& note){
+	std::getline(is, note.note[note.size]);
+	note.size++;
+	if (note.size == note.capacity)
+		note.Resize(note.capacity * 2);
 	return is;
 }
 
-
+std::wstring Note::vault = Settings::getUserFolder(FOLDERID_Documents);
