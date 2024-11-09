@@ -4,40 +4,24 @@ FileStream::FileStream(const wchar_t* file) : FileStream(file, true, true) {}
 FileStream::FileStream(const wchar_t* file, bool inOpen, bool outOpen)
 {
 	if (inOpen)
-		openFin(file);
+		openFin(file, fin);
 	if (outOpen)
-		openFout(file);
+		openFout(file, fout);
 }
 FileStream::~FileStream() {closeStreams();}
-
-FileStream& FileStream::operator=(FileStream* other)
-{
-	this->closeStreams();
-	this->fin = other->fin;
-	this->fout = other->fout;
-	other->fin = nullptr;
-	other->fout = nullptr;
-	return *this;
-}
-
-FileStream* FileStream::operator&() {return this;}
 
 void FileStream::closeStreams(){
 	closeFinStream();
 	closeFoutStream();
 }
 void FileStream::closeFinStream(){
-	if (this->fin != nullptr) {
-		fin->close();
-		delete fin;
-		fin = nullptr;
+	if (fin.is_open()) {
+		fin.close();
 	}
 }
 void FileStream::closeFoutStream(){
-	if (this->fout != nullptr) {
-		fout->close();
-		delete fout;
-		fout = nullptr;
+	if (fout.is_open()) {
+		fout.close();
 	}
 }
 
@@ -47,54 +31,42 @@ void FileStream::openStreams(const wchar_t* file){
 }
 
 void FileStream::openFinStream(const wchar_t* file){
-	if (fin == nullptr) {
-		openFin(file);
+	if (!fin.is_open()) {
+		openFin(file, fin);
 	}
 }
 
 void FileStream::openFoutStream(const wchar_t* file){
-	if (fout == nullptr) {
-		openFout(file);
+	if (!fout.is_open()) {
+		openFout(file, fout);
 	}
 }
 
-std::wifstream& FileStream::getFin() {return *fin;}
+std::wifstream& FileStream::getFin() {return fin;}
 
-std::wofstream& FileStream::getFout() {return *fout;}
+std::wofstream& FileStream::getFout() {return fout;}
 
-void FileStream::openFin(const wchar_t* file){
-	std::wifstream* temp = new std::wifstream;
-	
-	temp->exceptions(std::wifstream::badbit | std::wifstream::failbit);
-	try
-	{
+void FileStream::openFin(const wchar_t* file, std::wifstream& fin){
+	fin.exceptions(std::wifstream::badbit | std::wifstream::failbit);
+	try{
 		std::cout << "Opening file..." << std::endl;
-		temp->open(file, std::wifstream::app);
+		fin.open(file, std::wifstream::app);
 		std::cout << "File successful opened!" << std::endl;
-		fin = temp;
 	}
-	catch (const std::wfstream::failure& ex)
-	{
+	catch (const std::wifstream::failure& ex){
 		std::cout << "ERROR" << ex.what() << std::endl;
 		std::cout << "CODE:" << ex.code() << std::endl;
-		delete temp;
 	}
 }
-void FileStream::openFout(const wchar_t* file){
-	std::wofstream* temp = new std::wofstream;
-
-	temp->exceptions(std::wofstream::badbit | std::wofstream::failbit);
-	try
-	{
+void FileStream::openFout(const wchar_t* file, std::wofstream& fout){
+	fout.exceptions(std::wofstream::badbit | std::wofstream::failbit);
+	try{
 		std::cout << "Opening file..." << std::endl;
-		temp->open(file, std::wofstream::app);
+		fout.open(file, std::wofstream::app);
 		std::cout << "File successful opened!" << std::endl;
-		fout = temp;
 	}
-	catch (const std::wfstream::failure& ex)
-	{
+	catch (const std::wofstream::failure& ex){
 		std::cout << "ERROR" << ex.what() << std::endl;
 		std::cout << "CODE:" << ex.code() << std::endl;
-		delete temp;
 	}
 }

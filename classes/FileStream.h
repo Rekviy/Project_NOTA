@@ -11,8 +11,6 @@ public:
 	FileStream(const wchar_t* file);
 	FileStream(const wchar_t* file, bool OpenFin,bool OpenFout);
 	~FileStream();
-	FileStream& operator=(FileStream* other);
-	FileStream* operator&();
 	void closeStreams();
 	void closeFinStream();
 	void closeFoutStream();
@@ -21,11 +19,12 @@ public:
 	void openFoutStream(const wchar_t* file);
 	std::wifstream& getFin();
 	std::wofstream& getFout();
-
+	FileStream& operator=(const FileStream&) = delete;
+	FileStream(const FileStream&) = delete;
 private:
-	std::wifstream* fin = nullptr;
-	std::wofstream* fout = nullptr;
-	void openFin(const wchar_t* file);
-	void openFout(const wchar_t* file);
+	std::wifstream fin;
+	std::wofstream fout;
+	void openFin(const wchar_t* file, std::wifstream& fin);
+	void openFout(const wchar_t* file, std::wofstream& fout);
 };
 #endif
