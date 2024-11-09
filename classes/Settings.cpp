@@ -14,6 +14,7 @@ void Settings::loadNote(Note& note){
 
 void Settings::saveFileInfo(Note& note){
 	fs.getFout() << note.getName() + L" "+ note.getFile() + L" " + std::to_wstring(note.getCapacity()) + L" \n";
+	fs.getFout().flush();
 }
 
 void Settings::setSettingsDir(wchar_t* dir){

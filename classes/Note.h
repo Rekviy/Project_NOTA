@@ -16,8 +16,8 @@ public:
 	Note(std::wstring name = L"Unknown", std::wstring dir = L"");
 	~Note();
 
-	unsigned getCapacity();
-	unsigned getSize();
+	const unsigned getCapacity();
+	const unsigned getSize();
 
 	const std::wstring& getFile();
 	const std::wstring& getName();

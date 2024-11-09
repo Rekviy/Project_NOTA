@@ -13,8 +13,8 @@ Note::~Note(){
 	fs.closeStreams();
 }
 
-unsigned Note::getCapacity() {return capacity;}
-unsigned Note::getSize() {return size;}
+const unsigned Note::getCapacity() {return capacity;}
+const unsigned Note::getSize() {return size;}
 
 const std::wstring& Note::getFile() {return file;}
 const std::wstring& Note::getName() {return name;}
@@ -26,6 +26,7 @@ int Note::write(std::wstring& str){
 
 	note[size] = str + L"\n";
 	fs.getFout() << note[size];
+	fs.getFout().flush();
 	size++;
 
 	if (size == capacity)
@@ -43,6 +44,7 @@ void Note::load(){
 
 void Note::save(){
 	fs.getFout() << *this;
+	fs.getFout().flush();
 }
 
 void Note::reOpenFileStream(){
