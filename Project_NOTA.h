@@ -7,8 +7,10 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <Windows.h>
 //#include <cassert>
 #include "classes/Note.h"
+#include "classes/commands.h";
 #ifndef _UNICODE
 #define _UNICODE
 #endif
@@ -19,10 +21,8 @@
 void createNote(std::vector<Note*>& list);
 void deleteNote(std::vector<Note*>& list);
 void loadAllNote(std::vector<Note*>& list);
-void selectNote(std::vector<Note*>& list);
 void NoteUI(Note* note);
 int writeNote(Note* note);
 int readNote(Note* note);
-//would be replaced. Soon. Maybe.
-void TempGUI(std::vector<Note*>& list);
+void UI(std::vector<Note*> &list);
 #endif

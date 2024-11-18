@@ -4,50 +4,10 @@ int main(){
 	std::vector<Note*> list;
 	srand(time(NULL));
 	//setlocale(LC_ALL, "rus");
-	loadAllNote(list);
-	TempGUI(list);
+	UI(list);
 	
 	return 0;
 }
-
-
-void TempGUI(std::vector<Note*> &list)
-{
-	char action = '1';
-	do
-	{
-		std::cout << "Select action: " << std::endl;
-		std::cout
-			<< "1. Select note.\n"
-			<< "2. Create note.\n"
-			<< "3. Delete note.\n" 
-			<< "4. Load file.\n"
-			<< "(Q)uit." << std::endl;
-		std::cin >> action;
-
-		switch (action)
-		{
-		case '1':
-			selectNote(list);
-			break;
-		case '2':
-			createNote(list);
-			break;
-		case '3':
-			deleteNote(list);
-			break;
-		case '4':
-			break;
-		case 'q':
-		case 'Q':
-			std::cout << "Closing application..." << std::endl;
-			break;
-		default:
-			std::cout << "This option doesnt exist." << std::endl;
-			break;
-		}
-	} while (action != 'q' && action != 'Q');
-} 
 
 void createNote(std::vector<Note*>& list){
 	std::wstring dir;
@@ -62,8 +22,7 @@ void createNote(std::vector<Note*>& list){
 	temp->saveNote();
 }
 
-void deleteNote(std::vector<Note*>& list)
-{
+void deleteNote(std::vector<Note*>& list){
 	std::cout << "Enter the name of the Note you want to delete." << std::endl;
 	std::wstring name;
 	std::wcin >> name;
@@ -112,55 +71,9 @@ void loadAllNote(std::vector<Note*>& list) {
 	}
 }
 
-void selectNote(std::vector<Note*>& list)
-{
-	try
-	{
-		int selection = 0;
-		std::cout << "Created Notes: ";
-		for (unsigned i = 0; i < list.size(); i++)
-			std::wcout << i + 1 << L". " << list[i]->getName();
-		std::cout << std::endl << "Press 0 to quit\nSelect: ";
-		std::cin >> selection;
-		//temp
-		if (selection < 1 || selection > list.size()) {
-			std::cout << "This item doesn't exist!" << std::endl;
-			return;
-		}
-
-		NoteUI(list[selection - 1]);
-	}
-	catch (const std::exception& ex)
-	{
-		std::cout << "Something went wrong!";
-		std::cout << ex.what() << std::endl;
-		return;
-	}
-}
-
-void NoteUI(Note* note)
-{
-	char var = 0;
-	while (var != 'q' && var != 'Q')
-	{
-		std::cout << "1: Write\t" << "2: Read\n" << "(Q)uit" << std::endl;
-		std::cin >> var;
-
-		switch (var)
-		{
-		case '1':
-			writeNote(note);
-			break;
-		case '2':
-			readNote(note);
-			system("pause");
-			break;
-		default:
-			std::cout << "Quiting the application..." << std::endl;
-			break;
-		}
-
-		system("cls");
+void NoteUI(Note* note){
+	std::wcout << *note << std::endl;
+	while (true){
 	}
 }
 
@@ -177,8 +90,53 @@ int writeNote(Note* note) {
 	return 0;
 
 }
-int readNote(Note* note)
-{
-	std::wcout << *note << std::endl;
-	return 0;
+
+
+void UI(std::vector<Note*> &list){
+	CommandMap cm;
+	while (true){
+		system("cls");
+		std::cout << "Comand list: " <<
+			"\n1. make - creates new note" <<
+			"\n2. write - open note to editing" <<
+			"\n3. del - delete's note" <<
+			"\n wq - to exit" << std::endl;
+		std::cout << "Command: ";
+		
+		std::vector<std::wstring> com;
+		try{
+			std::wstring input;
+			std::getline(std::wcin, input);
+			for (int i = 0, prev_end = 0; i < input.size() + 1; ++i) {
+				if (input[i] == L' ' || input[i] == L'\0') {
+					com.push_back(input.substr(prev_end, i - prev_end));
+					prev_end = i + 1;
+					continue;
+				}
+			}
+		}
+		catch (const std::exception& ex){
+			std::cout<<"\n" << ex.what() << std::endl;
+		}
+		
+
+		switch (cm.checkCommand(com[0])) {
+		case make:
+			createNote(list);
+			break;
+		case write:
+			break;
+		case del:
+			deleteNote(list);
+			break;
+		case wq:
+			std::cout << "Closing application..." << std::endl;
+			return;
+		default:
+			std::cout << "Invalid command!" << std::endl;
+			break;
+		}
+		system("pause");
+	}
+	
 }
